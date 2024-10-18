@@ -16,9 +16,10 @@ model = YOLO("yolov8n.pt")
 st.set_page_config(page_title="Crowd Control Dashboard", layout="wide")
 st.title("Crowd Control Dashboard")
 
-# Sidebar for uploading video
+# Sidebar for uploading video and density threshold
 with st.sidebar:
     uploaded_video = st.file_uploader("Upload a video for crowd analysis", type=["mp4", "mov", "avi"])
+    density_threshold = st.slider("Set Density Threshold (per hexagon)", min_value=1, max_value=10, value=1)
 
 # Real-time placeholders for charts and metrics
 object_counts = []
@@ -109,7 +110,6 @@ while cap.isOpened():
         # Get crowd count and density
         crowd_count = len(boxes)
         object_counts.append(crowd_count)
-        crowd_density = crowd_count / (width * height / 1e6)
         occupancy_percentage = (crowd_count / (width * height / 1e6)) * 100
         occupancy_percentages.append(occupancy_percentage)
 
@@ -144,40 +144,44 @@ while cap.isOpened():
         crowd_count_placeholder.metric("Current Crowd Count", crowd_count)
         avg_speed_placeholder.metric("Average Speed", f"{avg_speed:.2f} px/frame")
 
-        # Update X-Y plane with current positions using hexbin
-        # Update X-Y plane with current positions using hexbin
+        # Update X-Y plane with current positions
         if len(x_coords) > 0:
-           plt.clf()  # Clear the previous plot
-           plt.figure(figsize=(6, 6))
+            plt.clf()  # Clear the previous plot
+            plt.figure(figsize=(6, 6))
+            plt.scatter(x_coords, height - np.array(y_coords), color='red', label="Object Centers")  # Invert Y-axis
+            plt.xlim(0, width)
+            plt.ylim(0, height)  # Set Y-axis to normal
+            plt.title('X-Y Plane of Object Centers')
+            plt.xlabel('X Coordinate')
+            plt.ylabel('Y Coordinate')
+            plt.grid(True)
+            plt.legend()
+            xy_plane_placeholder.pyplot(plt)
 
-          # Calculate density values using hexbin
-           hexbin_plot = plt.hexbin(x_coords, y_coords, gridsize=15, cmap='Reds', mincnt=1, vmin=0, vmax=5)
+        # Hexbin plot for density
+        if len(x_coords) > 0:
+            plt.clf()  # Clear the previous plot
+            plt.figure(figsize=(8, 6))
+            hexbin_plot = plt.hexbin(x_coords, height - np.array(y_coords), gridsize=10, mincnt=1,vmin=1, vmax=10, cmap='Reds')  # Invert Y-axis
+            plt.colorbar(hexbin_plot, label='Density')
+            plt.title('Hexbin Density Plot of Object Centers')
+            plt.xlabel('X Coordinate')
+            plt.ylabel('Y Coordinate')
+            plt.xlim(0, width)
+            plt.ylim(0, height)  # Set Y-axis to normal
+            density_chart_placeholder.pyplot(plt)
 
-          # Adjust vmin and vmax based on your desired density range
-           plt.colorbar(hexbin_plot, label='Density')
-           plt.xlim(0, width)
-           plt.ylim(0, height)  # Set the limits to match the correct orientation
-           plt.title('Hexbin Representation of Object Centers')
-           plt.xlabel('X Coordinate')
-           plt.ylabel('Y Coordinate')
-           xy_plane_placeholder.pyplot(plt)
+            # Calculate the maximum density in hexbin
+            current_density = np.max(hexbin_plot.get_array())
+            #st.sidebar.write(f"Current Density: {current_density} objects/hexagon")
 
-
+            # Check if the current density exceeds the threshold
+            if current_density > density_threshold:
+                alert_placeholder.warning(f"Alert: Density exceeded threshold! Current Density: {current_density} objects/hexagon")
 
         # Update charts in real-time
         if len(object_counts) > 1:
             rate_of_change = np.diff(object_counts)
-
-            # Update Crowd Density over Time chart
-            plt.clf()  # Clear previous plot
-            plt.figure(figsize=(10, 6))
-            plt.plot(object_counts, label='Object Count per Frame')
-            plt.title('Crowd Density over Time')
-            plt.xlabel('Frame Number')
-            plt.ylabel('Object Count')
-            plt.legend()
-            plt.grid(True)
-            density_chart_placeholder.pyplot(plt)
 
             # Update Rate of Change in Crowd Density chart
             plt.clf()  # Clear previous plot
