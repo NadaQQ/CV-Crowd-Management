@@ -1,6 +1,5 @@
-from ultralytics import YOLO, solutions
+from ultralytics import YOLO
 import matplotlib.pyplot as plt
-
 import cv2
 import streamlit as st
 import numpy as np
@@ -11,24 +10,25 @@ import time
 from scipy.spatial import distance
 
 # Load the pre-trained YOLO model
-model = YOLO("best.pt")
-heatmap = solutions.Heatmap(colormap=cv2.COLORMAP_HOT, show=False, model="best.pt")
+model = YOLO("yolov8n.pt")
 
 # Streamlit dashboard setup
 st.set_page_config(page_title="Crowd Control Dashboard", layout="wide")
 st.title("Crowd Control Dashboard")
 
-# Sidebar for uploading video
+# Sidebar for uploading video and hexbin threshold slider
 with st.sidebar:
     uploaded_video = st.file_uploader("Upload a video for crowd analysis", type=["mp4", "mov", "avi"])
+    density_threshold = st.slider("Set Density Threshold (per hexagon)", min_value=1, max_value=10, value=1)
 
 # Real-time placeholders for charts and metrics
 object_counts = []
 occupancy_percentages = []
 rate_of_change_history = []
 
-# Placeholder for alert message
+# Placeholder for alert messages
 alert_placeholder = st.empty()
+hexbin_alert_placeholder = st.empty()
 
 if uploaded_video is not None:
     # Save uploaded video to a temporary file
@@ -49,8 +49,7 @@ if uploaded_video is not None:
     height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
     fps = int(cap.get(cv2.CAP_PROP_FPS))
 
-    # Tracking history for heatmap and speed calculations
-    history = deque(maxlen=5000)  # Increased history to accumulate all positions
+    # Tracking history for speed calculations
     object_speeds = defaultdict(lambda: deque(maxlen=5))  # Store speeds for each object
     previous_positions = {}  # Store previous frame positions for speed calculations
     crowd_alert_triggered = False
@@ -63,12 +62,13 @@ if uploaded_video is not None:
     avg_speed_placeholder = col2.empty()
     crowd_count_placeholder = col1.empty()
 
-    # Columns for video and heatmap
-    video_col, heatmap_col = st.columns(2)
+    # Columns for video and hexbin plot
+    video_col, hexbin_col = st.columns(2)
     video_placeholder = video_col.empty()
-    heatmap_placeholder = heatmap_col.empty()
+    hexbin_chart_placeholder = hexbin_col.empty()
 
-    # Set up placeholders for real-time charts next to each other
+    # Set up placeholders for real-time charts and metrics
+
     chart_col1, chart_col2, chart_col3 = st.columns(3)
     with chart_col1:
         density_chart_placeholder = st.empty()
@@ -76,11 +76,10 @@ if uploaded_video is not None:
         rate_of_change_chart_placeholder = st.empty()
     with chart_col3:
         occupancy_chart_placeholder = st.empty()
+        
     summary_metrics_placeholder = st.empty()
-
-    # Initialize lists to store data for plots
-    object_counts = []
-    occupancy_percentages = []
+    summary_metrics_placeholder2 = st.empty()
+    summary_metrics_placeholder3 = st.empty()# Metrics go here
 
     # Process the video in real-time
     frame_skip = 5
@@ -105,7 +104,6 @@ if uploaded_video is not None:
             # Get crowd count and density
             crowd_count = len(boxes)  
             object_counts.append(crowd_count)
-            crowd_density = crowd_count / (width * height / 1e6)  
             occupancy_percentage = (crowd_count / (width * height / 1e6)) * 100
             occupancy_percentages.append(occupancy_percentage)
 
@@ -114,13 +112,17 @@ if uploaded_video is not None:
                 alert_placeholder.warning("⚠️ Alert: High crowd density detected! Please take necessary action.")
                 crowd_alert_triggered = True
 
-            # Track detected positions for heatmap and speed
+            # Track detected positions for hexbin and speed
             current_positions = {}
+            x_coords = []  # Reset x_coords for the current frame
+            y_coords = []  # Reset y_coords for the current frame
             positions = []
 
             for idx, box in enumerate(boxes):
                 x_center = (box[0] + box[2]) / 2
                 y_center = (box[1] + box[3]) / 2
+                x_coords.append(x_center)
+                y_coords.append(y_center)
                 positions.append((int(x_center), int(y_center)))
                 current_positions[idx] = (int(x_center), int(y_center))  # Using loop index as a unique identifier
 
@@ -131,7 +133,6 @@ if uploaded_video is not None:
 
             # Update previous positions
             previous_positions = current_positions
-            history.extend(positions)
 
             # Update video in real-time
             video_placeholder.image(annotated_frame, channels="BGR")
@@ -141,11 +142,27 @@ if uploaded_video is not None:
             crowd_count_placeholder.metric("Current Crowd Count", crowd_count)
             avg_speed_placeholder.metric("Average Speed", f"{avg_speed:.2f} px/frame")
 
-            # Update heatmap using Ultralytics Heatmap solution
-            heatmap_frame = heatmap.generate_heatmap(frame)
-            heatmap_placeholder.image(heatmap_frame, channels="BGR")
+            # Hexbin plot for current frame
+            if len(x_coords) > 0:
+                plt.clf()  # Clear the previous plot
+                plt.figure(figsize=(6, 4))
+                hexbin_plot = plt.hexbin(x_coords, height - np.array(y_coords), gridsize=5, mincnt=1, vmin=0, vmax=10, cmap='Blues')  # Invert Y-axis
+                plt.colorbar(hexbin_plot, label='Density')
+                plt.title('Hexbin Density Plot of Object Centers')
+                plt.xlabel('X Coordinate')
+                plt.ylabel('Y Coordinate')
+                plt.xlim(0, width)
+                plt.ylim(0, height)  # Set Y-axis to normal
+                hexbin_chart_placeholder.pyplot(plt)
 
-    # Update charts in real-time
+                # Calculate the maximum density in hexbin for the current frame
+                current_density = np.max(hexbin_plot.get_array())
+
+                # Check if the current density exceeds the threshold
+                if current_density > density_threshold:
+                    hexbin_alert_placeholder.warning(f"Alert: Density exceeded threshold! Current Density: {current_density:.2f} objects/hexagon")
+
+            # Update charts in real-time
             if len(object_counts) > 1:
                 rate_of_change = np.diff(object_counts)
 
@@ -183,10 +200,11 @@ if uploaded_video is not None:
             if len(object_counts) > 1:
                 average_object_count = np.mean(object_counts)
                 average_occupancy = np.mean(occupancy_percentages)
-                summary_metrics_placeholder.write(f'Average Object Count (Crowd Density): {average_object_count:.2f}')
-                summary_metrics_placeholder.write(f'Average Occupancy Percentage: {average_occupancy:.2f}%')
-                summary_metrics_placeholder.write(f'Maximum Object Count: {max(object_counts)}')
-                summary_metrics_placeholder.write(f'Minimum Object Count: {min(object_counts)}')
+                summary_metrics_placeholder.write(f'**Average Object Count (Crowd Density):** {average_object_count:.2f}')
+                summary_metrics_placeholder2.write(f'**Maximum Object Count:** {max(object_counts)}')
+                summary_metrics_placeholder3.write(f'**Minimum Object Count:** {min(object_counts)}')
+            else:
+                summary_metrics_placeholder.write("No data available yet.")
 
         # Pause to simulate real-time FPS
         time.sleep(1 / fps)
