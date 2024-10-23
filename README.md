@@ -49,6 +49,7 @@ This project requires the following dependencies:
 - `matplotlib`: For hexbin plots
 - `scipy`: For calculating the Euclidean distance in speed analysis
 - `numpy`: For numerical operations
+- `SAHI`: SAHI model to optimize inference results
 
 ## How to Use
 
