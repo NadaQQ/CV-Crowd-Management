@@ -15,16 +15,6 @@ model = YOLO("best.pt")
 st.set_page_config(page_title="Crowd Control Dashboard", layout="wide")
 st.title("Crowd Control Dashboard")
 
-# Inject custom CSS for white background
-custom_css = """
-    <style>
-        .stApp {
-            background-color: white;
-        }
-    </style>
-"""
-st.markdown(custom_css, unsafe_allow_html=True)
-
 # Sidebar for uploading video and hexbin threshold slider
 with st.sidebar:
     uploaded_video = st.file_uploader("Upload a video for crowd analysis", type=["mp4", "mov", "avi"])
@@ -170,7 +160,7 @@ if uploaded_video is not None:
             if median_speed > speed_threshold:
                 speed_alert_placeholder.warning(f"⚠️ Alert: Median speed exceeded threshold! Current Median Speed: {median_speed:.2f} m/s")
 
-            crowd_count_placeholder.metric("Current Crowd Count", crowd_count)
+            crowd_count_placeholder.metric("Current People Count", crowd_count)
 
             # Update charts in real-time
             if len(object_counts) > 1:
