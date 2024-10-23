@@ -62,10 +62,10 @@ This project requires the following dependencies:
 ## Results
 
 ### Before
-[![](before.mp4)
+![](before.mp4)
 
 ### After
-[![](after.mp4)
+![](after.mp4)
 
 
 
