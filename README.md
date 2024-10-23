@@ -35,7 +35,7 @@ a computer vision project that provides a real-time crowd control analysis dashb
 
 4. Run the Streamlit app:
     ```bash
-    streamlit run app.py
+    streamlit run Dashboard.py
     ```
 
 ## Dependencies
