@@ -50,3 +50,12 @@ This project requires the following dependencies:
 - `scipy`: For calculating the Euclidean distance in speed analysis
 - `numpy`: For numerical operations
 
+## How to Use
+
+1. Upload a video file via the dashboard.
+2. Adjust the density and speed thresholds using the sidebar.
+3. View real-time crowd analysis.
+
+## Results
+
+
