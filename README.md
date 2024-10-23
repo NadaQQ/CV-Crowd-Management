@@ -31,7 +31,7 @@ a computer vision project that provides a real-time crowd control analysis dashb
     pip install -r requirements.txt
     ```
 
-3. Ensure you have a YOLO model weights file (`best.pt`).
+3. Ensure you have a YOLO model weights file (`best80.pt`).
 
 4. Run the Streamlit app:
     ```bash
