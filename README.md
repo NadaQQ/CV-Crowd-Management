@@ -60,10 +60,10 @@ This project requires the following dependencies:
 ## Results
 
 ### Before
-![](before.mp4)
+![](./examples/vid.mp4)
 
 ### After
-![](after.mp4)
+![](./examples/vid-inf.mp4)
 
 
 
