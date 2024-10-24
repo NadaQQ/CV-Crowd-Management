@@ -60,10 +60,8 @@ This project requires the following dependencies:
 ## Results
 
 ### Before
-[Watch the before video](https://github.com/NadaQQ/CV-Crowd-Management/blob/main/examples/vid.mp4)
+![Before](https://github.com/NadaQQ/CV-Crowd-Management/blob/main/examples/vid.gif)
 
 ### After
-[Watch the after video](https://github.com/NadaQQ/CV-Crowd-Management/blob/main/examples/vid-inf.mp4)
-
-
+![After](https://github.com/NadaQQ/CV-Crowd-Management/blob/main/examples/vid-inf.gif)
 
