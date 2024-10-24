@@ -60,10 +60,10 @@ This project requires the following dependencies:
 ## Results
 
 ### Before
-![](./examples/vid.mp4)
+![]([./examples/vid.mp4](https://github.com/NadaQQ/CV-Crowd-Management/blob/main/examples/vid.mp4))
 
 ### After
-![](./examples/vid-inf.mp4)
+![]([./examples/vid-inf.mp4](https://github.com/NadaQQ/CV-Crowd-Management/blob/main/examples/vid-inf.mp4))
 
 
 
