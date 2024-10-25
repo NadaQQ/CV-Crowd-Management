@@ -27,10 +27,13 @@ a computer vision project that provides a real-time crowd control analysis dashb
     ```
 
 2. Install the required dependencies
+   ```bash
+    pip install -r requirements.txt
+    ```
 
-3. Ensure you have a YOLO model weights file (`best80.pt`).
+4. Ensure you have a YOLO model weights file (`best80.pt`).
 
-4. Run the Streamlit app:
+5. Run the Streamlit app:
     ```bash
     streamlit run Dashboard.py
     ```
