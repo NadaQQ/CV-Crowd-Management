@@ -54,7 +54,7 @@ This project requires the following dependencies:
 2. Adjust the density and speed thresholds using the sidebar.
 3. View real-time crowd analysis.
 
-## Results
+## Inference Results
 
 ### Before
 ![Before](https://github.com/NadaQQ/CV-Crowd-Management/blob/main/examples/vid.gif)
