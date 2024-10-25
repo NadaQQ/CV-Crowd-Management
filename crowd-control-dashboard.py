@@ -41,7 +41,7 @@ st.title("Crowd Control Dashboard")
 with st.sidebar:
     uploaded_video = st.file_uploader("Upload a video for crowd analysis", type=["mp4", "mov", "avi"])
     density_threshold_slider = st.slider("Set Density Threshold(Person/Hexgon) ", min_value=1.0, max_value=3.0, value=1.5, step=1.0)
-    speed_threshold = st.slider("Set Speed Threshold (m/s)", min_value=0.0, max_value=20.0, value=5.0)
+    speed_threshold = st.slider("Set Speed Threshold (u/s)", min_value=0.0, max_value=20.0, value=5.0)
 
 # Real-time placeholders for charts and metrics
 object_counts = []
