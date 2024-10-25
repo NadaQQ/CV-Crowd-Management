@@ -1,6 +1,6 @@
 # ذَروة (Peak)
 
-<img src="logo.png" alt="Project Logo" width="1000"/> <!-- Adjust width as needed -->
+<img src="Logo.png" alt="Project Logo" width="1000"/> <!-- Adjust width as needed -->
 
 
 ## Overview
