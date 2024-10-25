@@ -26,10 +26,7 @@ a computer vision project that provides a real-time crowd control analysis dashb
     git clone https://github.com/NadaQQ/CV-Crowd-Management.git
     ```
 
-2. Install the required dependencies:
-    ```bash
-    pip install -r requirements.txt
-    ```
+2. Install the required dependencies
 
 3. Ensure you have a YOLO model weights file (`best80.pt`).
 
