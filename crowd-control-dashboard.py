@@ -12,7 +12,7 @@ from sahi.utils.file import download_from_url
 from scipy.spatial import distance
 
 # Load the pre-trained YOLO model
-model = YOLO("best.pt")
+model = YOLO("best80.pt")
 # Initialize the SAHI model (can be your YOLOv8 or YOLOv5 model path)
 detection_model = AutoDetectionModel.from_pretrained(
     model_type='yolov8',
