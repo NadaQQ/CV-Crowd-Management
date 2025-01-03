@@ -1,10 +1,9 @@
-matplotlib==3.8.2
-numpy==2.1.2
-opencv_python==4.10.0.84
-opencv_python_headless==4.9.0.80
-pandas==2.2.3
-plotly==5.24.1
-sahi==0.11.18
-scipy==1.14.1
-streamlit==1.38.0
-ultralytics==8.3.18
+streamlit
+ultralytics
+opencv-python-headless  # Use this to avoid GUI dependencies (since it's running in Docker)
+numpy
+plotly
+matplotlib
+sahi
+scipy
+
